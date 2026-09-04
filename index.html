@@ -547,11 +547,11 @@
           </div>
           <div class="spread-line">
             <span class="sk">+ FxFee (%)</span>
-            <span class="sv">1,50%</span>
+            <input type="text" class="sv editable" id="fxFeeTensecInput" value="3,50%" autocomplete="off">
           </div>
           <div class="spread-total">
             <span class="st-label">= Custo Total (%)</span>
-            <span class="st-val" id="custoTotalTensec">2,50%</span>
+            <span class="st-val" id="custoTotalTensec">5,00%</span>
           </div>
         </div>
       </div>
@@ -582,7 +582,7 @@
             <div class="result-row"><span class="result-label">Spread</span><span class="result-value" id="tSpread">—</span></div>
             <div class="result-row"><span class="result-label">Taxa de Câmbio</span><span class="result-value accent" id="tTaxa">—</span></div>
             <div class="result-row"><span class="result-label">Valor da Conversão (BRL)</span><span class="result-value" id="tConv">—</span></div>
-            <div class="result-row"><span class="result-label">FxFee (1,5%)</span><span class="result-value red" id="tFxFee">—</span></div>
+            <div class="result-row"><span class="result-label" id="tFxFeeLabel">FxFee</span><span class="result-value red" id="tFxFee">—</span></div>
             <div class="result-row"><span class="result-label">Custo Total (%)</span><span class="result-value red" id="tCustoP">—</span></div>
             <div class="result-row"><span class="result-label">Valor da Transação c/ Custos ↑</span><span class="result-value highlight green" id="tDep">—</span></div>
           </div>
@@ -773,9 +773,9 @@
       const spB   = getSpread('spreadBancoInput');
       const spT   = getSpread('spreadTensecInput');
 
-      // IOF e FxFee (fixos do form.xlsx)
+      // IOF fixo; FxFee agora editável no painel Tensec
       const IOF    = 0.035;
-      const FXFEE  = 0.015;
+      const FXFEE  = getFxFee();
       const REVSH  = 0.70;
 
       // Banco
@@ -807,6 +807,7 @@
       document.getElementById('tSpread').textContent  = pct(spT);
       document.getElementById('tTaxa').textContent    = 'R$ ' + fmt(taxaT,4);
       document.getElementById('tConv').textContent    = fmtBRL(convT);
+      document.getElementById('tFxFeeLabel').textContent = 'FxFee (' + pct(FXFEE) + ')';
       document.getElementById('tFxFee').textContent   = pct(FXFEE);
       document.getElementById('tCustoP').textContent  = pct(custoTT);
       document.getElementById('tDep').textContent     = fmtBRL(depT);
@@ -865,7 +866,7 @@
       const spB = getSpread('spreadBancoInput');
       const spT = getSpread('spreadTensecInput');
       document.getElementById('custoTotalBanco').textContent  = pct(spB + 0.035);
-      document.getElementById('custoTotalTensec').textContent = pct(spT + 0.015);
+      document.getElementById('custoTotalTensec').textContent = pct(spT + getFxFee());
       calcular();
     });
 
@@ -881,8 +882,15 @@
     return spreadState[id] / 100;
   }
 
+  // FxFee da Tensec — editável, default 3,50%
+  function getFxFee() {
+    const v = spreadState['fxFeeTensecInput'];
+    return (v === undefined || isNaN(v)) ? 0.035 : v / 100;
+  }
+
   setupSpreadInput('spreadBancoInput', 0.5);
   setupSpreadInput('spreadTensecInput', 1.5);
+  setupSpreadInput('fxFeeTensecInput', 3.5);
 
   // ── boot ─────────────────────────────────────────────────────
   fetchSpot();
